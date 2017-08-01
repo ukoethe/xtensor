@@ -120,7 +120,7 @@ namespace xt
         EXPECT_TRUE(equalIter(bv3.begin(), bv3.end(), bv4.begin(), SIZE));
         EXPECT_TRUE(equalVector(bv3, bv4));
 
-        BV bv5(bv3.begin(), copy_reversed);
+        BV bv5(bv3.begin(), bv3.end(), copy_reversed);
         EXPECT_TRUE(equalIter(bv3.begin(), bv3.end(),
             std::reverse_iterator<typename BV::iterator>(bv5.end()), SIZE));
 
@@ -135,14 +135,6 @@ namespace xt
         fv = bv3;
         EXPECT_TRUE(equalIter(bv3.begin(), bv3.end(), fv.begin(), SIZE));
         EXPECT_TRUE(equalVector(bv3, fv));
-
-        tiny_array<double, 5> fv5;
-        fv5.init(fv3.begin(), fv3.end());
-        EXPECT_EQ(fv5[0], fv3[0]);
-        EXPECT_EQ(fv5[1], fv3[1]);
-        EXPECT_EQ(fv5[2], fv3[2]);
-        EXPECT_EQ(fv5[3], SIZE <= 3 ? 0.0 : fv3[3]);
-        EXPECT_EQ(fv5[4], SIZE <= 4 ? 0.0 : fv3[4]);
 
         EXPECT_EQ(iv3, (iv3.template subarray<0, SIZE>()));
         EXPECT_EQ(2, (iv3.template subarray<0, 2>().size()));
@@ -482,15 +474,6 @@ namespace xt
             EXPECT_EQ(s, ss.str());
         }
 
-        tiny_symmetric_view<int, 3> sym(a.data());
-        EXPECT_EQ(sym.shape(), (Index{ 3, 3 }));
-        {
-            std::string s = "{4, 5, 6,\n 5, 7, 8,\n 6, 8, 9}";
-            std::stringstream ss;
-            ss << sym;
-            EXPECT_EQ(s, ss.str());
-        }
-
         Array::as_type<float> b = a;
         EXPECT_EQ(a, b);
 
@@ -631,5 +614,4 @@ namespace xt
 
         EXPECT_EQ(A::unit_vector(tags::size = 3, 1), TA::unit_vector(1));
     }
-
 } // namespace xt

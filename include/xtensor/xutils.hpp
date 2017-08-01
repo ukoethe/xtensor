@@ -377,7 +377,7 @@ namespace xt
         constexpr R initializer_shape(U t, std::index_sequence<I...>)
         {
             using size_type = typename R::value_type;
-            return {size_type(initializer_shape_impl<I>::value(t))...};
+            return R{size_type(initializer_shape_impl<I>::value(t))...};
         }
     }
 
@@ -451,7 +451,8 @@ namespace xt
         return size == N;
     }
 
-    template <class T, int N>
+    template <class T, int N,
+              XTENSOR_REQUIRE<(N >= 0)>>
     inline bool resize_container(tiny_array<T, N>& a, typename tiny_array<T, N>::size_type size)
     {
         return size == N;

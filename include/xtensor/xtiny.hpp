@@ -178,6 +178,12 @@ struct tiny_array_is_static
 template <class VALUETYPE, tags::memory_policy MP, int ... N>
 class tiny_array_base;
 
+/********************************************************/
+/*                                                      */
+/*      tiny_array_base: static shape, owns memory      */
+/*                                                      */
+/********************************************************/
+
 template <class VALUETYPE, int ... N>
 class tiny_array_base<VALUETYPE, tags::owns_memory, N...>
 : public tiny_array_tag
@@ -419,6 +425,12 @@ class tiny_array_base<VALUETYPE, tags::owns_memory, N...>
     }
 };
 
+/********************************************************/
+/*                                                      */
+/*   tiny_array_base: static shape, borrowed memory     */
+/*                                                      */
+/********************************************************/
+
 template <class VALUETYPE, int ... N>
 class tiny_array_base<VALUETYPE, tags::borrowed_memory, N...>
 : public tiny_array_tag
@@ -576,6 +588,12 @@ class tiny_array_base<VALUETYPE, tags::borrowed_memory, N...>
         }
     }
 };
+
+/********************************************************/
+/*                                                      */
+/*      tiny_array_base: dynamic shape, owns memory     */
+/*                                                      */
+/********************************************************/
 
 template <class VALUETYPE>
 class tiny_array_base<VALUETYPE, tags::owns_memory, runtime_size>
@@ -767,6 +785,12 @@ class tiny_array_base<VALUETYPE, tags::owns_memory, runtime_size>
         swap(this->data_, other.data_);
     }
 };
+
+/********************************************************/
+/*                                                      */
+/*   tiny_array_base: dynamic shape, borrowed memory    */
+/*                                                      */
+/********************************************************/
 
 template <class VALUETYPE>
 class tiny_array_base<VALUETYPE, tags::borrowed_memory, runtime_size>
@@ -1198,10 +1222,10 @@ class tiny_array_impl
         return res;
     }
 
-    template <class V, tags::memory_policy OM, int M>
+    template <class V, tags::memory_policy MP, int M>
     inline
     tiny_array<value_type, static_size>
-    transpose(tiny_array_impl<V, OM, M> const & permutation) const
+    transpose(tiny_array_impl<V, MP, M> const & permutation) const
     {
         static_assert(sizeof...(N) == 1,
             "tiny_array::transpose(): only allowed for 1-dimensional arrays.");
@@ -1392,10 +1416,10 @@ std::ostream & operator<<(std::ostream & o, tiny_array_impl<T, MP, N1, N2> const
 //@{
 
     /// element-wise equal
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ...M, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ...M, int ... N>
 inline bool
-operator==(tiny_array_impl<V1, OM1, M...> const & l,
-           tiny_array_impl<V2, OM2, N...> const & r)
+operator==(tiny_array_impl<V1, MP1, M...> const & l,
+           tiny_array_impl<V2, MP2, N...> const & r)
 {
     if(!l.is_same_shape(r))
         return false;
@@ -1406,11 +1430,11 @@ operator==(tiny_array_impl<V1, OM1, M...> const & l,
 }
 
     /// element-wise equal to a constant
-template <class V1, tags::memory_policy OM1, class V2, int ...M,
+template <class V1, tags::memory_policy MP1, class V2, int ...M,
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
-operator==(tiny_array_impl<V1, OM1, M...> const & l,
+operator==(tiny_array_impl<V1, MP1, M...> const & l,
            V2 const & r)
 {
     for(int k=0; k < l.size(); ++k)
@@ -1420,12 +1444,12 @@ operator==(tiny_array_impl<V1, OM1, M...> const & l,
 }
 
     /// element-wise equal to a constant
-template <class V1, class V2, tags::memory_policy OM2, int ...M,
+template <class V1, class V2, tags::memory_policy MP2, int ...M,
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
 operator==(V1 const & l,
-           tiny_array_impl<V2, OM2, M...> const & r)
+           tiny_array_impl<V2, MP2, M...> const & r)
 {
     for(int k=0; k < r.size(); ++k)
         if(l != r[k])
@@ -1434,10 +1458,10 @@ operator==(V1 const & l,
 }
 
     /// element-wise not equal
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... M, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... M, int ... N>
 inline bool
-operator!=(tiny_array_impl<V1, OM1, M...> const & l,
-           tiny_array_impl<V2, OM2, N...> const & r)
+operator!=(tiny_array_impl<V1, MP1, M...> const & l,
+           tiny_array_impl<V2, MP2, N...> const & r)
 {
     if(!l.is_same_shape(r))
         return true;
@@ -1448,11 +1472,11 @@ operator!=(tiny_array_impl<V1, OM1, M...> const & l,
 }
 
     /// element-wise not equal to a constant
-template <class V1, tags::memory_policy OM1, class V2, int ... M,
+template <class V1, tags::memory_policy MP1, class V2, int ... M,
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
-operator!=(tiny_array_impl<V1, OM1, M...> const & l,
+operator!=(tiny_array_impl<V1, MP1, M...> const & l,
            V2 const & r)
 {
     for(int k=0; k < l.size(); ++k)
@@ -1462,12 +1486,12 @@ operator!=(tiny_array_impl<V1, OM1, M...> const & l,
 }
 
     /// element-wise not equal to a constant
-template <class V1, class V2, tags::memory_policy OM2, int ... N,
+template <class V1, class V2, tags::memory_policy MP2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
 operator!=(V1 const & l,
-           tiny_array_impl<V2, OM2, N...> const & r)
+           tiny_array_impl<V2, MP2, N...> const & r)
 {
     for(int k=0; k < r.size(); ++k)
         if(l != r[k])
@@ -1476,10 +1500,10 @@ operator!=(V1 const & l,
 }
 
     /// lexicographical less
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-operator<(tiny_array_impl<V1, OM1, N...> const & l,
-          tiny_array_impl<V2, OM2, N...> const & r)
+operator<(tiny_array_impl<V1, MP1, N...> const & l,
+          tiny_array_impl<V2, MP2, N...> const & r)
 {
     const index_t min_size = min(l.size(), r.size());
     for(int k = 0; k < min_size; ++k)
@@ -1493,36 +1517,36 @@ operator<(tiny_array_impl<V1, OM1, N...> const & l,
 }
 
     /// lexicographical less-equal
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-operator<=(tiny_array_impl<V1, OM1, N...> const & l,
-           tiny_array_impl<V2, OM2, N...> const & r)
+operator<=(tiny_array_impl<V1, MP1, N...> const & l,
+           tiny_array_impl<V2, MP2, N...> const & r)
 {
     return !(r < l);
 }
 
     /// lexicographical greater
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-operator>(tiny_array_impl<V1, OM1, N...> const & l,
-          tiny_array_impl<V2, OM2, N...> const & r)
+operator>(tiny_array_impl<V1, MP1, N...> const & l,
+          tiny_array_impl<V2, MP2, N...> const & r)
 {
     return r < l;
 }
 
     /// lexicographical greater-equal
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-operator>=(tiny_array_impl<V1, OM1, N...> const & l,
-           tiny_array_impl<V2, OM2, N...> const & r)
+operator>=(tiny_array_impl<V1, MP1, N...> const & l,
+           tiny_array_impl<V2, MP2, N...> const & r)
 {
     return !(l < r);
 }
 
     /// check if all elements are non-zero (or 'true' if V is bool)
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline bool
-all(tiny_array_impl<V, OM, N...> const & t)
+all(tiny_array_impl<V, MP, N...> const & t)
 {
     for(int i=0; i<t.size(); ++i)
         if(t[i] == V())
@@ -1531,9 +1555,9 @@ all(tiny_array_impl<V, OM, N...> const & t)
 }
 
     /// check if at least one element is non-zero (or 'true' if V is bool)
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline bool
-any(tiny_array_impl<V, OM, N...> const & t)
+any(tiny_array_impl<V, MP, N...> const & t)
 {
     for(int i=0; i<t.size(); ++i)
         if(t[i] != V())
@@ -1542,9 +1566,9 @@ any(tiny_array_impl<V, OM, N...> const & t)
 }
 
     /// check if all elements are zero (or 'false' if V is bool)
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline bool
-all_zero(tiny_array_impl<V, OM, N...> const & t)
+all_zero(tiny_array_impl<V, MP, N...> const & t)
 {
     for(int i=0; i<t.size(); ++i)
         if(t[i] != V())
@@ -1553,10 +1577,10 @@ all_zero(tiny_array_impl<V, OM, N...> const & t)
 }
 
     /// pointwise less-than
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-all_less(tiny_array_impl<V1, OM1, N...> const & l,
-         tiny_array_impl<V2, OM2, N...> const & r)
+all_less(tiny_array_impl<V1, MP1, N...> const & l,
+         tiny_array_impl<V2, MP2, N...> const & r)
 {
     XTENSOR_ASSERT_RUNTIME_SIZE(N..., l.size() == r.size(),
         "tiny_array_base::all_less(): size mismatch.");
@@ -1568,11 +1592,11 @@ all_less(tiny_array_impl<V1, OM1, N...> const & l,
 
     /// pointwise less than a constant
     /// (typically used to check negativity with `r = 0`)
-template <class V1, tags::memory_policy OM1, class V2, int ... N,
+template <class V1, tags::memory_policy MP1, class V2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
-all_less(tiny_array_impl<V1, OM1, N...> const & l,
+all_less(tiny_array_impl<V1, MP1, N...> const & l,
          V2 const & r)
 {
     for(int k=0; k < l.size(); ++k)
@@ -1583,12 +1607,12 @@ all_less(tiny_array_impl<V1, OM1, N...> const & l,
 
     /// constant pointwise less than the vector
     /// (typically used to check positivity with `l = 0`)
-template <class V1, class V2, tags::memory_policy OM2, int ... N,
+template <class V1, class V2, tags::memory_policy MP2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
 all_less(V1 const & l,
-         tiny_array_impl<V2, OM2, N...> const & r)
+         tiny_array_impl<V2, MP2, N...> const & r)
 {
     for(int k=0; k < r.size(); ++k)
         if (l >= r[k])
@@ -1597,10 +1621,10 @@ all_less(V1 const & l,
 }
 
     /// pointwise less-equal
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-all_less_equal(tiny_array_impl<V1, OM1, N...> const & l,
-               tiny_array_impl<V2, OM2, N...> const & r)
+all_less_equal(tiny_array_impl<V1, MP1, N...> const & l,
+               tiny_array_impl<V2, MP2, N...> const & r)
 {
     XTENSOR_ASSERT_RUNTIME_SIZE(N..., l.size() == r.size(),
         "tiny_array_base::all_less_equal(): size mismatch.");
@@ -1612,11 +1636,11 @@ all_less_equal(tiny_array_impl<V1, OM1, N...> const & l,
 
     /// pointwise less-equal with a constant
     /// (typically used to check non-positivity with `r = 0`)
-template <class V1, tags::memory_policy OM1, class V2, int ... N,
+template <class V1, tags::memory_policy MP1, class V2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
-all_less_equal(tiny_array_impl<V1, OM1, N...> const & l,
+all_less_equal(tiny_array_impl<V1, MP1, N...> const & l,
                V2 const & r)
 {
     for(int k=0; k < l.size(); ++k)
@@ -1627,12 +1651,12 @@ all_less_equal(tiny_array_impl<V1, OM1, N...> const & l,
 
     /// pointwise less-equal with a constant
     /// (typically used to check non-negativity with `l = 0`)
-template <class V1, class V2, tags::memory_policy OM2, int ... N,
+template <class V1, class V2, tags::memory_policy MP2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
 all_less_equal(V1 const & l,
-               tiny_array_impl<V2, OM2, N...> const & r)
+               tiny_array_impl<V2, MP2, N...> const & r)
 {
     for(int k=0; k < r.size(); ++k)
         if (l > r[k])
@@ -1641,10 +1665,10 @@ all_less_equal(V1 const & l,
 }
 
     /// pointwise greater-than
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-all_greater(tiny_array_impl<V1, OM1, N...> const & l,
-            tiny_array_impl<V2, OM2, N...> const & r)
+all_greater(tiny_array_impl<V1, MP1, N...> const & l,
+            tiny_array_impl<V2, MP2, N...> const & r)
 {
     XTENSOR_ASSERT_RUNTIME_SIZE(N..., l.size() == r.size(),
         "tiny_array_base::all_greater(): size mismatch.");
@@ -1656,11 +1680,11 @@ all_greater(tiny_array_impl<V1, OM1, N...> const & l,
 
     /// pointwise greater-than with a constant
     /// (typically used to check positivity with `r = 0`)
-template <class V1, tags::memory_policy OM1, class V2, int ... N,
+template <class V1, tags::memory_policy MP1, class V2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
-all_greater(tiny_array_impl<V1, OM1, N...> const & l,
+all_greater(tiny_array_impl<V1, MP1, N...> const & l,
             V2 const & r)
 {
     for(int k=0; k < l.size(); ++k)
@@ -1671,12 +1695,12 @@ all_greater(tiny_array_impl<V1, OM1, N...> const & l,
 
     /// constant pointwise greater-than a vector
     /// (typically used to check negativity with `l = 0`)
-template <class V1, class V2, tags::memory_policy OM2, int ... N,
+template <class V1, class V2, tags::memory_policy MP2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
 all_greater(V1 const & l,
-            tiny_array_impl<V2, OM2, N...> const & r)
+            tiny_array_impl<V2, MP2, N...> const & r)
 {
     for(int k=0; k < r.size(); ++k)
         if (l <= r[k])
@@ -1685,10 +1709,10 @@ all_greater(V1 const & l,
 }
 
     /// pointwise greater-equal
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-all_greater_equal(tiny_array_impl<V1, OM1, N...> const & l,
-                  tiny_array_impl<V2, OM2, N...> const & r)
+all_greater_equal(tiny_array_impl<V1, MP1, N...> const & l,
+                  tiny_array_impl<V2, MP2, N...> const & r)
 {
     XTENSOR_ASSERT_RUNTIME_SIZE(N..., l.size() == r.size(),
         "tiny_array_base::all_greater_equal(): size mismatch.");
@@ -1700,11 +1724,11 @@ all_greater_equal(tiny_array_impl<V1, OM1, N...> const & l,
 
     /// pointwise greater-equal with a constant
     /// (typically used to check non-negativity with `r = 0`)
-template <class V1, tags::memory_policy OM1, class V2, int ... N,
+template <class V1, tags::memory_policy MP1, class V2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
-all_greater_equal(tiny_array_impl<V1, OM1, N...> const & l,
+all_greater_equal(tiny_array_impl<V1, MP1, N...> const & l,
                   V2 const & r)
 {
     for(int k=0; k < l.size(); ++k)
@@ -1715,12 +1739,12 @@ all_greater_equal(tiny_array_impl<V1, OM1, N...> const & l,
 
     /// pointwise greater-equal with a constant
     /// (typically used to check non-positivity with `l = 0`)
-template <class V1, class V2, tags::memory_policy OM2, int ... N,
+template <class V1, class V2, tags::memory_policy MP2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value &&
                           std::is_convertible<V2, V1>::value> >
 inline bool
 all_greater_equal(V1 const & l,
-                  tiny_array_impl<V2, OM2, N...> const & r)
+                  tiny_array_impl<V2, MP2, N...> const & r)
 {
     for(int k=0; k < r.size(); ++k)
         if (l < r[k])
@@ -1728,10 +1752,10 @@ all_greater_equal(V1 const & l,
     return true;
 }
 
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline bool
-isclose(tiny_array_impl<V1, OM1, N...> const & l,
-        tiny_array_impl<V2, OM2, N...> const & r,
+isclose(tiny_array_impl<V1, MP1, N...> const & l,
+        tiny_array_impl<V2, MP2, N...> const & r,
         promote_t<V1, V2> epsilon = 2.0*std::numeric_limits<promote_t<V1, V2> >::epsilon())
 {
     XTENSOR_ASSERT_RUNTIME_SIZE(N..., l.size() == r.size(),
@@ -1770,22 +1794,22 @@ operator+=(tiny_array_impl<V1, MP, N...> & l,
            tiny_array_impl<V2, OTHER_MP, N...> const & r);
 
     /// element-wise addition
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator+(tiny_array_impl<V1, OM1, N...> const & l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+operator+(tiny_array_impl<V1, MP1, N...> const & l,
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// element-wise scalar addition
-template <class V1, tags::memory_policy OM1, class V2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator+(tiny_array_impl<V1, OM1, N...> const & l,
+operator+(tiny_array_impl<V1, MP1, N...> const & l,
           V2 r);
 
     /// element-wise left scalar addition
-template <class V1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
 operator+(V1 l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// scalar subtract-assignment
 template <class V1, tags::memory_policy MP, int ... N, class V2,
@@ -1801,22 +1825,22 @@ operator-=(tiny_array_impl<V1, MP, N...> & l,
            tiny_array_impl<V2, OTHER_MP, N...> const & r);
 
     /// element-wise subtraction
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator-(tiny_array_impl<V1, OM1, N...> const & l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+operator-(tiny_array_impl<V1, MP1, N...> const & l,
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// element-wise scalar subtraction
-template <class V1, tags::memory_policy OM1, class V2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator-(tiny_array_impl<V1, OM1, N...> const & l,
+operator-(tiny_array_impl<V1, MP1, N...> const & l,
           V2 r);
 
     /// element-wise left scalar subtraction
-template <class V1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
 operator-(V1 l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// scalar multiply-assignment
 template <class V1, tags::memory_policy MP, int ... N, class V2,
@@ -1832,22 +1856,22 @@ operator*=(tiny_array_impl<V1, MP, N...> & l,
            tiny_array_impl<V2, OTHER_MP, N...> const & r);
 
     /// element-wise multiplication
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator*(tiny_array_impl<V1, OM1, N...> const & l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+operator*(tiny_array_impl<V1, MP1, N...> const & l,
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// element-wise scalar multiplication
-template <class V1, tags::memory_policy OM1, class V2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator*(tiny_array_impl<V1, OM1, N...> const & l,
+operator*(tiny_array_impl<V1, MP1, N...> const & l,
           V2 r);
 
     /// element-wise left scalar multiplication
-template <class V1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
 operator*(V1 l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// scalar divide-assignment
 template <class V1, tags::memory_policy MP, int ... N, class V2,
@@ -1863,22 +1887,22 @@ operator/=(tiny_array_impl<V1, MP, N...> & l,
            tiny_array_impl<V2, OTHER_MP, N...> const & r);
 
     /// element-wise division
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator/(tiny_array_impl<V1, OM1, N...> const & l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+operator/(tiny_array_impl<V1, MP1, N...> const & l,
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// element-wise scalar division
-template <class V1, tags::memory_policy OM1, class V2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator/(tiny_array_impl<V1, OM1, N...> const & l,
+operator/(tiny_array_impl<V1, MP1, N...> const & l,
           V2 r);
 
     /// element-wise left scalar division
-template <class V1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
 operator/(V1 l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// scalar modulo-assignment
 template <class V1, tags::memory_policy MP, int ... N, class V2,
@@ -1894,22 +1918,22 @@ operator%=(tiny_array_impl<V1, MP, N...> & l,
            tiny_array_impl<V2, OTHER_MP, N...> const & r);
 
     /// element-wise modulo
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator%(tiny_array_impl<V1, OM1, N...> const & l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+operator%(tiny_array_impl<V1, MP1, N...> const & l,
+          tiny_array_impl<V2, MP2, N...> const & r);
 
     /// element-wise scalar modulo
-template <class V1, tags::memory_policy OM1, class V2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
-operator%(tiny_array_impl<V1, OM1, N...> const & l,
+operator%(tiny_array_impl<V1, MP1, N...> const & l,
           V2 r);
 
     /// element-wise left scalar modulo
-template <class V1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, class V2, tags::memory_policy MP2, int ... N>
 tiny_array<promote_t<V1, V2>, N...>
 operator%(V1 l,
-          tiny_array_impl<V2, OM2, N...> const & r);
+          tiny_array_impl<V2, MP2, N...> const & r);
 
 #else
 
@@ -1937,46 +1961,46 @@ operator OP##=(tiny_array_impl<V1, MP, N...> & l, \
         l[i] OP##= r[i]; \
     return l; \
 } \
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N> \
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N> \
 inline \
 tiny_array_impl<decltype((*(V1*)0) OP (*(V2*)0)), tags::owns_memory, N...> \
-operator OP(tiny_array_impl<V1, OM1, N...> const & l, \
-            tiny_array_impl<V2, OM2, N...> const & r) \
+operator OP(tiny_array_impl<V1, MP1, N...> const & l, \
+            tiny_array_impl<V2, MP2, N...> const & r) \
 { \
     tiny_array_impl<decltype((*(V1*)0) OP (*(V2*)0)), tags::owns_memory, N...> res(l); \
     return res OP##= r; \
 } \
  \
-template <class V1, tags::memory_policy OM1, class V2, int ... N, \
+template <class V1, tags::memory_policy MP1, class V2, int ... N, \
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value> >\
 inline \
 tiny_array_impl<decltype((*(V1*)0) OP (*(V2*)0)), tags::owns_memory, N...> \
-operator OP(tiny_array_impl<V1, OM1, N...> const & l, \
+operator OP(tiny_array_impl<V1, MP1, N...> const & l, \
             V2 r) \
 { \
     tiny_array_impl<decltype((*(V1*)0) OP (*(V2*)0)), tags::owns_memory, N...> res(l); \
     return res OP##= r; \
 } \
  \
-template <class V1, class V2, tags::memory_policy OM2, int ... N, \
+template <class V1, class V2, tags::memory_policy MP2, int ... N, \
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value && \
                           !std::is_base_of<std::ios_base, V1>::value> >\
 inline \
 tiny_array_impl<decltype((*(V1*)0) OP (*(V2*)0)), tags::owns_memory, N...> \
 operator OP(V1 l, \
-             tiny_array_impl<V2, OM2, N...> const & r) \
+             tiny_array_impl<V2, MP2, N...> const & r) \
 { \
     tiny_array_impl<decltype((*(V1*)0) OP (*(V2*)0)), tags::owns_memory, N...> res{l}; \
     return res OP##= r; \
 } \
  \
-template <class V1, class V2, tags::memory_policy OM2, \
+template <class V1, class V2, tags::memory_policy MP2, \
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value && \
                           !std::is_base_of<std::ios_base, V1>::value> >\
 inline \
 tiny_array_impl<decltype((*(V1*)0) OP (*(V2*)0)), tags::owns_memory, runtime_size> \
 operator OP(V1 l, \
-             tiny_array_impl<V2, OM2, runtime_size> const & r) \
+             tiny_array_impl<V2, MP2, runtime_size> const & r) \
 { \
     tiny_array_impl<decltype((*(V1*)0) OP (*(V2*)0)), tags::owns_memory, runtime_size> res(tags::size=r.size(), l); \
     return res OP##= r; \
@@ -1999,9 +2023,9 @@ XTENSOR_TINYARRAY_OPERATORS(>>)
 
     // define sqrt() explicitly because its return type
     // is needed for type inference
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline tiny_array_impl<real_promote_t<V>, tags::owns_memory, N...>
-sqrt(tiny_array_impl<V, OM, N...> const & v)
+sqrt(tiny_array_impl<V, MP, N...> const & v)
 {
     using namespace cmath;
     tiny_array_impl<real_promote_t<V>, tags::owns_memory, N...> res(v.size(), dont_init);
@@ -2011,9 +2035,9 @@ sqrt(tiny_array_impl<V, OM, N...> const & v)
 }
 
 #define XTENSOR_TINYARRAY_UNARY_FUNCTION(FCT) \
-template <class V, tags::memory_policy OM, int ... N> \
+template <class V, tags::memory_policy MP, int ... N> \
 inline auto \
-FCT(tiny_array_impl<V, OM, N...> const & v) \
+FCT(tiny_array_impl<V, MP, N...> const & v) \
 { \
     using namespace cmath; \
     tiny_array<bool_promote_t<decltype(FCT(*(V*)0))>, N...> res(v.size(), dont_init); \
@@ -2080,10 +2104,10 @@ XTENSOR_TINYARRAY_UNARY_FUNCTION(arg)
 #undef XTENSOR_TINYARRAY_UNARY_FUNCTION
 
     /// Arithmetic negation
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-operator-(tiny_array_impl<V, OM, N...> const & v)
+operator-(tiny_array_impl<V, MP, N...> const & v)
 {
     tiny_array_impl<V, tags::owns_memory, N...> res(v.size(), dont_init);
     for(int k=0; k < v.size(); ++k)
@@ -2092,10 +2116,10 @@ operator-(tiny_array_impl<V, OM, N...> const & v)
 }
 
     /// Boolean negation
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-operator!(tiny_array_impl<V, OM, N...> const & v)
+operator!(tiny_array_impl<V, MP, N...> const & v)
 {
     tiny_array_impl<V, tags::owns_memory, N...> res(v.size(), dont_init);
     for(int k=0; k < v.size(); ++k)
@@ -2104,10 +2128,10 @@ operator!(tiny_array_impl<V, OM, N...> const & v)
 }
 
     /// Bitwise negation
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-operator~(tiny_array_impl<V, OM, N...> const & v)
+operator~(tiny_array_impl<V, MP, N...> const & v)
 {
     tiny_array_impl<V, tags::owns_memory, N...> res(v.size(), dont_init);
     for(int k=0; k < v.size(); ++k)
@@ -2116,10 +2140,10 @@ operator~(tiny_array_impl<V, OM, N...> const & v)
 }
 
 #define XTENSOR_TINYARRAY_BINARY_FUNCTION(FCT) \
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N> \
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N> \
 inline auto \
-FCT(tiny_array_impl<V1, OM1, N...> const & l, \
-    tiny_array_impl<V2, OM2, N...> const & r) \
+FCT(tiny_array_impl<V1, MP1, N...> const & l, \
+    tiny_array_impl<V2, MP2, N...> const & r) \
 { \
     XTENSOR_ASSERT_MSG(l.size() == r.size(), #FCT "(tiny_array, tiny_array): size mismatch."); \
     using namespace cmath; \
@@ -2141,9 +2165,9 @@ XTENSOR_TINYARRAY_BINARY_FUNCTION(hypot)
 
     /** Apply pow() function to each vector component.
     */
-template <class V, tags::memory_policy OM, class E, int ... N>
+template <class V, tags::memory_policy MP, class E, int ... N>
 inline auto
-pow(tiny_array_impl<V, OM, N...> const & v, E exponent)
+pow(tiny_array_impl<V, MP, N...> const & v, E exponent)
 {
     using namespace cmath;
     tiny_array<decltype(pow(v[0], exponent)), N...> res(v.size(), dont_init);
@@ -2153,12 +2177,12 @@ pow(tiny_array_impl<V, OM, N...> const & v, E exponent)
 }
 
     /// cross product
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int N,
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int N,
           XTENSOR_REQUIRE<N == 3 || N == runtime_size> >
 inline
 tiny_array<promote_t<V1, V2>, N>
-cross(tiny_array_impl<V1, OM1, N> const & r1,
-      tiny_array_impl<V2, OM2, N> const & r2)
+cross(tiny_array_impl<V1, MP1, N> const & r1,
+      tiny_array_impl<V2, MP2, N> const & r2)
 {
     XTENSOR_ASSERT_RUNTIME_SIZE(N, r1.size() == 3 && r2.size() == 3,
         "cross(): cross product requires size() == 3.");
@@ -2169,11 +2193,11 @@ cross(tiny_array_impl<V1, OM1, N> const & r1,
 }
 
     /// dot product of two vectors
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int N, int M>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int N, int M>
 inline
 promote_t<V1, V2>
-dot(tiny_array_impl<V1, OM1, N> const & l,
-    tiny_array_impl<V2, OM2, M> const & r)
+dot(tiny_array_impl<V1, MP1, N> const & l,
+    tiny_array_impl<V2, MP2, M> const & r)
 {
     XTENSOR_ASSERT_MSG(l.size() == r.size(), "dot(): size mismatch.");
     promote_t<V1, V2> res = promote_t<V1, V2>();
@@ -2183,10 +2207,10 @@ dot(tiny_array_impl<V1, OM1, N> const & l,
 }
 
     /// sum of the vector's elements
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 promote_t<V>
-sum(tiny_array_impl<V, OM, N...> const & l)
+sum(tiny_array_impl<V, MP, N...> const & l)
 {
     promote_t<V> res = promote_t<V>();
     for(int k=0; k < l.size(); ++k)
@@ -2195,9 +2219,9 @@ sum(tiny_array_impl<V, OM, N...> const & l)
 }
 
     /// mean of the vector's elements
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline real_promote_t<V>
-mean(tiny_array_impl<V, OM, N...> const & t)
+mean(tiny_array_impl<V, MP, N...> const & t)
 {
     using Promote = real_promote_t<V>;
     const Promote sumVal = static_cast<Promote>(sum(t));
@@ -2208,10 +2232,10 @@ mean(tiny_array_impl<V, OM, N...> const & t)
 }
 
     /// cumulative sum of the vector's elements
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<promote_t<V>, tags::owns_memory, N...>
-cumsum(tiny_array_impl<V, OM, N...> const & l)
+cumsum(tiny_array_impl<V, MP, N...> const & l)
 {
     tiny_array_impl<promote_t<V>, tags::owns_memory, N...> res(l);
     for(int k=1; k < l.size(); ++k)
@@ -2220,10 +2244,10 @@ cumsum(tiny_array_impl<V, OM, N...> const & l)
 }
 
     /// product of the vector's elements
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 promote_t<V>
-prod(tiny_array_impl<V, OM, N...> const & l)
+prod(tiny_array_impl<V, MP, N...> const & l)
 {
     using Promote = promote_t<V>;
     if(l.size() == 0)
@@ -2235,10 +2259,10 @@ prod(tiny_array_impl<V, OM, N...> const & l)
 }
 
     /// cumulative product of the vector's elements
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<promote_t<V>, tags::owns_memory, N...>
-cumprod(tiny_array_impl<V, OM, N...> const & l)
+cumprod(tiny_array_impl<V, MP, N...> const & l)
 {
     tiny_array_impl<promote_t<V>, tags::owns_memory, N...> res(l);
     for(int k=1; k < l.size(); ++k)
@@ -2247,11 +2271,11 @@ cumprod(tiny_array_impl<V, OM, N...> const & l)
 }
 
     /// element-wise minimum
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline
 tiny_array_impl<promote_t<V1, V2>, tags::owns_memory, N...>
-min(tiny_array_impl<V1, OM1, N...> const & l,
-    tiny_array_impl<V2, OM2, N...> const & r)
+min(tiny_array_impl<V1, MP1, N...> const & l,
+    tiny_array_impl<V2, MP2, N...> const & r)
 {
     XTENSOR_ASSERT_RUNTIME_SIZE(N..., l.size() == r.size(),
         "min(): size mismatch.");
@@ -2262,11 +2286,11 @@ min(tiny_array_impl<V1, OM1, N...> const & l,
 }
 
     /// element-wise minimum with a constant
-template <class V1, tags::memory_policy OM1, class V2, int ... N,
+template <class V1, tags::memory_policy MP1, class V2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value>>
 inline
 tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...>
-min(tiny_array_impl<V1, OM1, N...> const & l,
+min(tiny_array_impl<V1, MP1, N...> const & l,
     V2 const & r)
 {
     tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...> res(l.size(), dont_init);
@@ -2276,12 +2300,12 @@ min(tiny_array_impl<V1, OM1, N...> const & l,
 }
 
     /// element-wise minimum with a constant
-template <class V1, class V2, tags::memory_policy OM2, int ... N,
+template <class V1, class V2, tags::memory_policy MP2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value>>
 inline
 tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...>
 min(V1 const & l,
-    tiny_array_impl<V2, OM2, N...> const & r)
+    tiny_array_impl<V2, MP2, N...> const & r)
 {
     tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...> res(r.size(), dont_init);
     for(int k=0; k < r.size(); ++k)
@@ -2293,9 +2317,9 @@ min(V1 const & l,
 
         Returns -1 for an empty array.
     */
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline int
-min_element(tiny_array_impl<V, OM, N...> const & l)
+min_element(tiny_array_impl<V, MP, N...> const & l)
 {
     if(l.size() == 0)
         return -1;
@@ -2307,10 +2331,10 @@ min_element(tiny_array_impl<V, OM, N...> const & l)
 }
 
     /// minimal element
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 V const &
-min(tiny_array_impl<V, OM, N...> const & l)
+min(tiny_array_impl<V, MP, N...> const & l)
 {
     int m = min_element(l);
     xtensor_precondition(m >= 0, "min() on empty tiny_array.");
@@ -2318,11 +2342,11 @@ min(tiny_array_impl<V, OM, N...> const & l)
 }
 
     /// element-wise maximum
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int ... N>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int ... N>
 inline
 tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...>
-max(tiny_array_impl<V1, OM1, N...> const & l,
-    tiny_array_impl<V2, OM2, N...> const & r)
+max(tiny_array_impl<V1, MP1, N...> const & l,
+    tiny_array_impl<V2, MP2, N...> const & r)
 {
     xtensor_precondition(l.size() == r.size(),
         "max(): size mismatch.");
@@ -2333,11 +2357,11 @@ max(tiny_array_impl<V1, OM1, N...> const & l,
 }
 
     /// element-wise maximum with a constant
-template <class V1, tags::memory_policy OM1, class V2, int ... N,
+template <class V1, tags::memory_policy MP1, class V2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V2>::value>>
 inline
 tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...>
-max(tiny_array_impl<V1, OM1, N...> const & l,
+max(tiny_array_impl<V1, MP1, N...> const & l,
     V2 const & r)
 {
     tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...> res(l.size(), dont_init);
@@ -2347,12 +2371,12 @@ max(tiny_array_impl<V1, OM1, N...> const & l,
 }
 
     /// element-wise maximum with a constant
-template <class V1, class V2, tags::memory_policy OM2, int ... N,
+template <class V1, class V2, tags::memory_policy MP2, int ... N,
           XTENSOR_REQUIRE<!tiny_array_concept<V1>::value>>
 inline
 tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...>
 max(V1 const & l,
-    tiny_array_impl<V2, OM2, N...> const & r)
+    tiny_array_impl<V2, MP2, N...> const & r)
 {
     tiny_array_impl<std::common_type_t<V1, V2>, tags::owns_memory, N...> res(r.size(), dont_init);
     for(int k=0; k < r.size(); ++k)
@@ -2364,9 +2388,9 @@ max(V1 const & l,
 
         Returns -1 for an empty array.
     */
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline int
-max_element(tiny_array_impl<V, OM, N...> const & l)
+max_element(tiny_array_impl<V, MP, N...> const & l)
 {
     if(l.size() == 0)
         return -1;
@@ -2378,9 +2402,9 @@ max_element(tiny_array_impl<V, OM, N...> const & l)
 }
 
     /// maximal element
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline V const &
-max(tiny_array_impl<V, OM, N...> const & l)
+max(tiny_array_impl<V, MP, N...> const & l)
 {
     int m = max_element(l);
     xtensor_precondition(m >= 0, "max() on empty tiny_array.");
@@ -2388,30 +2412,30 @@ max(tiny_array_impl<V, OM, N...> const & l)
 }
 
 /// squared norm
-template <class V, tags::memory_policy OM, int ... N>
-inline squared_norm_t<tiny_array_impl<V, OM, N...> >
-squared_norm(tiny_array_impl<V, OM, N...> const & t)
+template <class V, tags::memory_policy MP, int ... N>
+inline squared_norm_t<tiny_array_impl<V, MP, N...> >
+squared_norm(tiny_array_impl<V, MP, N...> const & t)
 {
-    using Type = squared_norm_t<tiny_array_impl<V, OM, N...> >;
+    using Type = squared_norm_t<tiny_array_impl<V, MP, N...> >;
     Type result = Type();
     for(int i=0; i<t.size(); ++i)
         result += squared_norm(t[i]);
     return result;
 }
 
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 norm_t<V>
-mean_square(tiny_array_impl<V, OM, N...> const & t)
+mean_square(tiny_array_impl<V, MP, N...> const & t)
 {
     return norm_t<V>(squared_norm(t)) / t.size();
 }
 
     /// reversed copy
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-reversed(tiny_array_impl<V, OM, N...> const & t)
+reversed(tiny_array_impl<V, MP, N...> const & t)
 {
     return tiny_array_impl<V, tags::owns_memory, N...>(t.begin(), t.end(), copy_reversed);
 }
@@ -2420,27 +2444,27 @@ reversed(tiny_array_impl<V, OM, N...> const & t)
 
         Elements are arranged such that <tt>res[k] = t[permutation[k]]</tt>.
     */
-template <class V1, tags::memory_policy OM1, class V2, tags::memory_policy OM2, int N, int M>
+template <class V1, tags::memory_policy MP1, class V2, tags::memory_policy MP2, int N, int M>
 inline
 tiny_array<V1, N>
-transpose(tiny_array_impl<V1, OM1, N> const & v,
-          tiny_array_impl<V2, OM2, M> const & permutation)
+transpose(tiny_array_impl<V1, MP1, N> const & v,
+          tiny_array_impl<V2, MP2, M> const & permutation)
 {
     return v.transpose(permutation);
 }
 
-template <class V1, tags::memory_policy OM1, int N>
+template <class V1, tags::memory_policy MP1, int N>
 inline
 tiny_array<V1, N>
-transpose(tiny_array_impl<V1, OM1, N> const & v)
+transpose(tiny_array_impl<V1, MP1, N> const & v)
 {
     return reversed(v);
 }
 
-template <class V1, tags::memory_policy OM1, int N1, int N2>
+template <class V1, tags::memory_policy MP1, int N1, int N2>
 inline
 tiny_array<V1, N2, N1>
-transpose(tiny_array_impl<V1, OM1, N1, N2> const & v)
+transpose(tiny_array_impl<V1, MP1, N1, N2> const & v)
 {
     tiny_array<V1, N2, N1> res(dont_init);
     for(int i=0; i < N1; ++i)
@@ -2457,10 +2481,10 @@ transpose(tiny_array_impl<V1, OM1, N1, N2> const & v)
 
         All elements smaller than 0 are set to zero.
     */
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-clip_lower(tiny_array_impl<V, OM, N...> const & t)
+clip_lower(tiny_array_impl<V, MP, N...> const & t)
 {
     return clip_lower(t, V());
 }
@@ -2469,10 +2493,10 @@ clip_lower(tiny_array_impl<V, OM, N...> const & t)
 
         All elements smaller than \a val are set to \a val.
     */
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-clip_lower(tiny_array_impl<V, OM, N...> const & t, const V val)
+clip_lower(tiny_array_impl<V, MP, N...> const & t, const V val)
 {
     tiny_array_impl<V, tags::owns_memory, N...> res(t.size(), dont_init);
     for(int k=0; k < t.size(); ++k)
@@ -2486,10 +2510,10 @@ clip_lower(tiny_array_impl<V, OM, N...> const & t, const V val)
 
         All elements bigger than \a val are set to \a val.
     */
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-clip_upper(tiny_array_impl<V, OM, N...> const & t, const V val)
+clip_upper(tiny_array_impl<V, MP, N...> const & t, const V val)
 {
     tiny_array_impl<V, tags::owns_memory, N...> res(t.size(), dont_init);
     for(int k=0; k < t.size(); ++k)
@@ -2504,10 +2528,10 @@ clip_upper(tiny_array_impl<V, OM, N...> const & t, const V val)
         All elements less than \a valLower are set to \a valLower, all elements
         bigger than \a valUpper are set to \a valUpper.
     */
-template <class V, tags::memory_policy OM, int ... N>
+template <class V, tags::memory_policy MP, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-clip(tiny_array_impl<V, OM, N...> const & t,
+clip(tiny_array_impl<V, MP, N...> const & t,
      const V valLower, const V valUpper)
 {
     tiny_array_impl<V, tags::owns_memory, N...> res(t.size(), dont_init);
@@ -2527,12 +2551,12 @@ clip(tiny_array_impl<V, OM, N...> const & t,
         All elements less than \a valLower are set to \a valLower, all elements
         bigger than \a valUpper are set to \a valUpper.
     */
-template <class V, tags::memory_policy OM1, tags::memory_policy OM2, tags::memory_policy OM3, int ... N>
+template <class V, tags::memory_policy MP1, tags::memory_policy MP2, tags::memory_policy MP3, int ... N>
 inline
 tiny_array_impl<V, tags::owns_memory, N...>
-clip(tiny_array_impl<V, OM1, N...> const & t,
-     tiny_array_impl<V, OM2, N...> const & valLower,
-     tiny_array_impl<V, OM3, N...> const & valUpper)
+clip(tiny_array_impl<V, MP1, N...> const & t,
+     tiny_array_impl<V, MP2, N...> const & valLower,
+     tiny_array_impl<V, MP3, N...> const & valUpper)
 {
     XTENSOR_ASSERT_RUNTIME_SIZE(N..., t.size() == valLower.size() && t.size() == valUpper.size(),
         "clip(): size mismatch.");
@@ -2548,10 +2572,10 @@ clip(tiny_array_impl<V, OM1, N...> const & t,
     return res;
 }
 
-template <class T1, tags::memory_policy OM1, class T2, tags::memory_policy OM2, int ... N>
+template <class T1, tags::memory_policy MP1, class T2, tags::memory_policy MP2, int ... N>
 inline void
-swap(tiny_array_impl<T1, OM1, N...> & l,
-     tiny_array_impl<T2, OM2, N...> & r)
+swap(tiny_array_impl<T1, MP1, N...> & l,
+     tiny_array_impl<T2, MP2, N...> & r)
 {
     l.swap(r);
 }

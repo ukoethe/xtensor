@@ -1006,6 +1006,46 @@ namespace xt
 
     #endif
 
+    /*************************
+     * conditional type cast *
+     *************************/
+
+    template <bool condition, class T>
+    struct conditional_cast_functor;
+
+    template <class T>
+    struct conditional_cast_functor<false, T>
+    {
+        template <class U>
+        inline U && operator()(U && u) const
+        {
+            return std::forward<U>(u);
+        }
+    };
+
+    template <class T>
+    struct conditional_cast_functor<true, T>
+    {
+        template <class U>
+        inline auto operator()(U && u) const
+        {
+            return static_cast<T>(std::forward<U>(u));
+        }
+    };
+
+    /** @brief Perform a type cast when a condition is true.
+        If <tt>condition</tt> is true, return <tt>static_cast<T>(u)</tt>,
+        otherwise return <tt>u</tt> unchanged. This is useful when an unconditional
+        static_cast would force undesired type conversions in some situations where
+        an error or warning would be desired. The condition determines when the
+        explicit cast is ok.
+     */
+    template <bool condition, class T, class U>
+    inline auto conditional_cast(U && u)
+    {
+        return conditional_cast_functor<condition, T>()(std::forward<U>(u));
+    };
+
     /************************************
      * arithmetic type promotion traits *
      ************************************/
@@ -1039,6 +1079,42 @@ namespace xt
         */
     template <class... T>
     using promote_type_t = typename promote_type<T...>::type;
+
+    /** @brief Traits class to find the biggest type of the same kind.
+     *   For example, <tt>big_promote_type<unsigned char>::type</tt> is <tt>unsigned long long</tt>.
+     *   The default implementation only supports built-in types and <tt>std::complex</tt>. All
+     *   other types remain unchanged unless <tt>big_promote_type</tt> gets specialized for them.
+     */
+    template <class T>
+    struct big_promote_type
+    {
+      private:
+        using V = std::decay_t<T>;
+        static const bool is_arithmetic = std::is_arithmetic<V>::value;
+        static const bool is_signed = std::is_signed<V>::value;
+        static const bool is_integral = std::is_integral<V>::value;
+        static const bool is_long_double = std::is_same<V, long double>::value;
+
+      public:
+        using type = std::conditional_t<is_arithmetic,
+                        std::conditional_t<is_integral,
+                            std::conditional_t<is_signed, long long, unsigned long long>,
+                            std::conditional_t<is_long_double, long double, double>
+                        >,
+                        V
+                     >;
+    };
+
+    template <class T>
+    struct big_promote_type<std::complex<T>>
+    {
+        using type = std::complex<typename big_promote_type<T>::type>;
+    };
+
+    /** @brief Abbreviation of 'typename big_promote_type<T>::type'.
+     */
+    template <class T>
+    using big_promote_type_t = typename big_promote_type<T>::type;
 
     namespace traits_detail
     {

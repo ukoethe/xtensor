@@ -150,12 +150,23 @@ namespace xt
         EXPECT_EQ(forward_real(rlv), 1.0);
     }
 
+    TEST(utils, conditional_cast)
+    {
+        EXPECT_TRUE((std::is_same<decltype(conditional_cast<false, double>(1)), int>::value));
+        EXPECT_TRUE((std::is_same<decltype(conditional_cast<true, double>(1)), double>::value));
+    }
+
     TEST(utils, promote_traits)
     {
         EXPECT_TRUE((std::is_same<promote_type_t<uint8_t>, int>::value));
         EXPECT_TRUE((std::is_same<promote_type_t<int>, int>::value));
         EXPECT_TRUE((std::is_same<promote_type_t<float>, float>::value));
         EXPECT_TRUE((std::is_same<promote_type_t<double>, double>::value));
+
+        EXPECT_TRUE((std::is_same<big_promote_type_t<uint8_t>, unsigned long long>::value));
+        EXPECT_TRUE((std::is_same<big_promote_type_t<int>, long long>::value));
+        EXPECT_TRUE((std::is_same<big_promote_type_t<float>, double>::value));
+        EXPECT_TRUE((std::is_same<big_promote_type_t<double>, double>::value));
 
         EXPECT_TRUE((std::is_same<real_promote_type_t<uint8_t>, double>::value));
         EXPECT_TRUE((std::is_same<real_promote_type_t<int>, double>::value));

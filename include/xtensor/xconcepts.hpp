@@ -81,6 +81,32 @@ namespace xt
             std::is_pointer<T>::value ||
             std::is_same<decltype(test((V*)0)), int>::value;
     };
+
+        /** @brief Check if a conversion may loose information.
+
+            @tparam FROM source type
+            @tparam TO target type
+
+            When data is converted from a big type (e.g. <tt>int64_t</tt> or <tt>double</tt>)
+            to a smaller type (e.g. <tt>int32_t</tt>), most compilers issue a 'possible loss of data'
+            warning. This metafunction allows you to detect these situations and take appropriate
+            actions.
+
+            If a possible loss of data is detected, member <tt>value</tt> is true. Currently,
+            this is only implemented for buildt-in types, i.e. types where <tt>std::is_arithmetic</tt>
+            is true.
+            \endcode
+        */
+    template <class FROM, class TO>
+    struct is_narrowing_conversion
+    {
+        using argument_type = std::decay_t<FROM>;
+        using result_type = std::decay_t<TO>;
+
+        static const bool value = std::is_arithmetic<result_type>::value &&
+            (sizeof(result_type) < sizeof(argument_type) ||
+            (std::is_integral<result_type>::value && std::is_floating_point<argument_type>::value));
+    };
 } // namespace xt
 
 #endif // XCONCEPTS_HPP

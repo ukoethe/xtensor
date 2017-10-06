@@ -114,6 +114,7 @@ set(XTENSOR_TESTS
     test_xtensor.cpp
     test_xtensor_adaptor.cpp
     test_xtensor_semantic.cpp
+    test_xtiny_experiment.cpp
     test_xvectorize.cpp
     test_xview.cpp
     test_xview_semantic.cpp

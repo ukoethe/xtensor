@@ -30,56 +30,139 @@
     #define XTENSOR_ASSERT_INSIDE(array, diff)
 #endif
 
-namespace xt {
-
-    /// Determine size of an array type at runtime.
-static const int runtime_size  = -1;
-
-    /// Don't initialize memory that gets overwritten anyway.
-enum skip_initialization_tag { dont_init };
-
-    /// Copy-construct array in reversed order.
-enum reverse_copy_tag { copy_reversed };
-
-struct tiny_array_tag {};
-
-template <class T>
-struct tiny_array_concept
+namespace xt
 {
-    static const bool value = std::is_base_of<tiny_array_tag, std::decay_t<T>>::value;
-};
 
-namespace tags {
+        /// Determine size of an array type at runtime.
+    static const int runtime_size  = -1;
 
-enum memory_policy { owns_memory, borrowed_memory };
+        /// Don't initialize memory that gets overwritten anyway.
+    enum skip_initialization_tag { dont_init };
 
-    // Support for tags::size keyword argument
-    // to disambiguate array sizes from initial values.
-struct size_proxy
-{
-    size_t value;
-};
+        /// Copy-construct array in reversed order.
+    enum reverse_copy_tag { copy_reversed };
 
-struct size_tag
-{
-    size_proxy operator=(size_t s) const
+    struct tiny_array_tag {};
+
+    template <class T>
+    struct tiny_array_concept
     {
-        return {s};
-    }
+        static const bool value = std::is_base_of<tiny_array_tag, std::decay_t<T>>::value;
+    };
 
-    size_proxy operator()(size_t s) const
+    namespace tags
     {
-        return {s};
-    }
-};
 
-namespace {
+        enum memory_policy { owns_memory, borrowed_memory };
 
-size_tag size;
+            // Support for tags::size keyword argument
+            // to disambiguate array sizes from initial values.
+        struct size_proxy
+        {
+            size_t value;
+        };
 
-}
+        struct size_tag
+        {
+            size_proxy operator=(size_t s) const
+            {
+                return {s};
+            }
 
-} // namespace tags
+            size_proxy operator()(size_t s) const
+            {
+                return {s};
+            }
+        };
+
+        namespace
+        {
+            size_tag size;
+        }
+    } // namespace tags
+
+    namespace cmath
+    {
+
+        using std::abs;
+        using std::fabs;
+
+        using std::cos;
+        using std::sin;
+        using std::tan;
+        using std::acos;
+        using std::asin;
+        using std::atan;
+
+        using std::cosh;
+        using std::sinh;
+        using std::tanh;
+        using std::acosh;
+        using std::asinh;
+        using std::atanh;
+
+        using std::sqrt;
+        using std::cbrt;
+
+        using std::exp;
+        using std::exp2;
+        using std::expm1;
+        using std::log;
+        using std::log2;
+        using std::log10;
+        using std::log1p;
+        using std::logb;
+        using std::ilogb;
+
+        using std::ceil;
+        using std::floor;
+        using std::lround;
+        using std::llround;
+        using std::nearbyint;
+        using std::rint;
+        using std::round;
+        using std::trunc;
+
+        using std::isfinite;
+        using std::isinf;
+        using std::isnan;
+
+        using std::erf;
+        using std::erfc;
+        using std::lgamma;
+        using std::tgamma;
+
+        using std::conj;
+        using std::real;
+        using std::imag;
+        using std::arg;
+
+        using std::atan2;
+        using std::copysign;
+        using std::fdim;
+        using std::fmax;
+        using std::fmin;
+        using std::fmod;
+        using std::hypot;
+        using std::remainder;
+
+        using std::pow;
+        using std::fma;
+
+            // add missing abs() overloads for unsigned types
+        #define XTENSOR_DEFINE_UNSIGNED_ABS(T) \
+            inline T abs(T t) { return t; }
+
+        XTENSOR_DEFINE_UNSIGNED_ABS(bool)
+        XTENSOR_DEFINE_UNSIGNED_ABS(unsigned char)
+        XTENSOR_DEFINE_UNSIGNED_ABS(unsigned short)
+        XTENSOR_DEFINE_UNSIGNED_ABS(unsigned int)
+        XTENSOR_DEFINE_UNSIGNED_ABS(unsigned long)
+        XTENSOR_DEFINE_UNSIGNED_ABS(unsigned long long)
+
+        #undef XTENSOR_DEFINE_UNSIGNED_ABS
+    } // namespace cmath
+
 
     /** \brief The general type of array indices.
 

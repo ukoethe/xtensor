@@ -1067,7 +1067,7 @@ template <class VALUETYPE, tags::memory_policy MP, int ... N>
 class tiny_array_impl
 : public tiny_array_base<VALUETYPE, MP, N ...>
 {
-    using tiny_array_base<VALUETYPE, MP, N ...>::shape_helper;
+    using shape_helper = typename tiny_array_base<VALUETYPE, MP, N ...>::shape_helper;
 
   public:
     template <class NEW_VALUETYPE>
@@ -1198,61 +1198,61 @@ class tiny_array_impl
         return this->data_[i];
     }
 
-    template <bool IS_STATIC=is_static>
-    std::enable_if_t<IS_STATIC, reference>
-    operator[](index_t const (&i)[static_ndim])
-    {
-        return this->data_[shape_helper::offset(i)];
-    }
+    // template <bool IS_STATIC=is_static>
+    // std::enable_if_t<IS_STATIC, reference>
+    // operator[](index_t const (&i)[static_ndim])
+    // {
+        // return this->data_[shape_helper::offset(i)];
+    // }
 
-    template <bool IS_STATIC=is_static>
-    std::enable_if_t<IS_STATIC, const_reference>
-    operator[](index_t const (&i)[static_ndim]) const
-    {
-        return this->data_[shape_helper::offset(i)];
-    }
+    // template <bool IS_STATIC=is_static>
+    // std::enable_if_t<IS_STATIC, const_reference>
+    // operator[](index_t const (&i)[static_ndim]) const
+    // {
+        // return this->data_[shape_helper::offset(i)];
+    // }
 
-    template <bool IS_STATIC=is_static>
-    std::enable_if_t<IS_STATIC, reference>
-    at(index_t const (&i)[static_ndim])
-    {
-        return at(shape_helper::offset(i));
-    }
+    // template <bool IS_STATIC=is_static>
+    // std::enable_if_t<IS_STATIC, reference>
+    // at(index_t const (&i)[static_ndim])
+    // {
+        // return at(shape_helper::offset(i));
+    // }
 
-    template <bool IS_STATIC=is_static>
-    std::enable_if_t<IS_STATIC, const_reference>
-    at(index_t const (&i)[static_ndim]) const
-    {
-        return at(shape_helper::offset(i));
-    }
+    // template <bool IS_STATIC=is_static>
+    // std::enable_if_t<IS_STATIC, const_reference>
+    // at(index_t const (&i)[static_ndim]) const
+    // {
+        // return at(shape_helper::offset(i));
+    // }
 
-    template <bool IS_STATIC=is_static>
-    std::enable_if_t<IS_STATIC, reference>
-    operator[](index_type const & i)
-    {
-        return this->data_[shape_helper::offset(i.data())];
-    }
+    // template <bool IS_STATIC=is_static>
+    // std::enable_if_t<IS_STATIC, reference>
+    // operator[](index_type const & i)
+    // {
+        // return this->data_[shape_helper::offset(i.data())];
+    // }
 
-    template <bool IS_STATIC=is_static>
-    std::enable_if_t<IS_STATIC, reference>
-    operator[](index_type const & i) const
-    {
-        return this->data_[shape_helper::offset(i.data())];
-    }
+    // template <bool IS_STATIC=is_static>
+    // std::enable_if_t<IS_STATIC, reference>
+    // operator[](index_type const & i) const
+    // {
+        // return this->data_[shape_helper::offset(i.data())];
+    // }
 
-    template <bool IS_STATIC=is_static>
-    std::enable_if_t<IS_STATIC, reference>
-    at(index_type const & i)
-    {
-        return at(shape_helper::offset(i.data()));
-    }
+    // template <bool IS_STATIC=is_static>
+    // std::enable_if_t<IS_STATIC, reference>
+    // at(index_type const & i)
+    // {
+        // return at(shape_helper::offset(i.data()));
+    // }
 
-    template <bool IS_STATIC=is_static>
-    std::enable_if_t<IS_STATIC, const_reference>
-    at(index_type const & i) const
-    {
-        return at(shape_helper::offset(i.data()));
-    }
+    // template <bool IS_STATIC=is_static>
+    // std::enable_if_t<IS_STATIC, const_reference>
+    // at(index_type const & i) const
+    // {
+        // return at(shape_helper::offset(i.data()));
+    // }
 
     template <class ... V>
     reference operator()(V...v)
@@ -1350,10 +1350,10 @@ class tiny_array_impl
         return res;
     }
 
-    template <class V, tags::memory_policy MP, int M>
+    template <class V, tags::memory_policy OMP, int M>
     inline
     tiny_array<value_type, static_size>
-    transpose(tiny_array_impl<V, MP, M> const & permutation) const
+    transpose(tiny_array_impl<V, OMP, M> const & permutation) const
     {
         static_assert(sizeof...(N) == 1,
             "tiny_array::transpose(): only allowed for 1-dimensional arrays.");
@@ -2149,6 +2149,7 @@ XTENSOR_TINYARRAY_OPERATORS(>>)
 
 #endif // DOXYGEN
 
+#if 0
     // define sqrt() explicitly because its return type
     // is needed for type inference
 template <class V, tags::memory_policy MP, int ... N>
@@ -2707,6 +2708,8 @@ swap(tiny_array_impl<T1, MP1, N...> & l,
 {
     l.swap(r);
 }
+
+#endif // if 0
 
 } // namespace xt
 

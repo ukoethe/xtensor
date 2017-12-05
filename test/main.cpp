@@ -7,9 +7,16 @@
 ****************************************************************************/
 
 #include "gtest/gtest.h"
+#include "xtensor/xtiny_experiment.hpp"
+#include "xtensor/xtiny.hpp"
+#include <benchmark/benchmark.h>
 
 int main(int argc, char* argv[])
 {
+    ::benchmark::Initialize(&argc, argv);
+    if (::benchmark::ReportUnrecognizedArguments(argc, argv))
+        return 1;
+    ::benchmark::RunSpecifiedBenchmarks();
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

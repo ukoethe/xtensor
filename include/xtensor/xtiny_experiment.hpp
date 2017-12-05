@@ -18,26 +18,26 @@
 namespace xt
 {
     template <class T, int N>
-    class xtiny_array;
+    class xtiny_array_experiment;
 
     template <class T, int N>
-    struct xcontainer_inner_types<xtiny_array<T, N>>
+    struct xcontainer_inner_types<xtiny_array_experiment<T, N>>
     {
-        using temporary_type = xtiny_array<T, N>;
+        using temporary_type = xtiny_array_experiment<T, N>;
     };
 
     template <class T, int N>
-    struct xiterable_inner_types<xtiny_array<T, N>>
+    struct xiterable_inner_types<xtiny_array_experiment<T, N>>
     {
         using inner_shape_type = std::array<size_t, 1>;
-        using stepper = xindexed_stepper<xtiny_array<T, N>, false>;
-        using const_stepper = xindexed_stepper<xtiny_array<T, N>, true>;
+        using stepper = xindexed_stepper<xtiny_array_experiment<T, N>, false>;
+        using const_stepper = xindexed_stepper<xtiny_array_experiment<T, N>, true>;
     };
 
     template <class T, int N>
-    class xtiny_array
-    : public xiterable<xtiny_array<T, N>>
-    , public xcontainer_semantic<xtiny_array<T, N>>
+    class xtiny_array_experiment
+    : public xiterable<xtiny_array_experiment<T, N>>
+    , public xcontainer_semantic<xtiny_array_experiment<T, N>>
     {
 
       public:
@@ -59,7 +59,7 @@ namespace xt
         static constexpr layout_type static_layout = layout_type::row_major;
         static constexpr bool contiguous_layout = true;
 
-        using self_type = xtiny_array<T, N>;
+        using self_type = xtiny_array_experiment<T, N>;
         using semantic_base = xcontainer_semantic<self_type>;
 
         using inner_shape_type = shape_type;
@@ -72,20 +72,20 @@ namespace xt
 
         T data_[N];
 
-        xtiny_array(const_reference initial = value_type())
+        xtiny_array_experiment(const_reference initial = value_type())
         {
             for(int k=0; k<N; ++k)
                 data_[k] = initial;
         }
 
-        xtiny_array(const xtiny_array&) = default;
-        xtiny_array& operator=(const xtiny_array&) = default;
+        xtiny_array_experiment(const xtiny_array_experiment&) = default;
+        xtiny_array_experiment& operator=(const xtiny_array_experiment&) = default;
 
-        xtiny_array(xtiny_array&&) = default;
-        xtiny_array& operator=(xtiny_array&&) = default;
+        xtiny_array_experiment(xtiny_array_experiment&&) = default;
+        xtiny_array_experiment& operator=(xtiny_array_experiment&&) = default;
 
         template <class E>
-        xtiny_array(const xexpression<E>& e)
+        xtiny_array_experiment(const xexpression<E>& e)
         {
             semantic_base::assign(e);
         }
@@ -184,19 +184,19 @@ namespace xt
         void reshape(const shape_type& s)
         {
             XTENSOR_PRECONDITION(s == shape(),
-                "xtiny_array::reshape(): invalid target shape.");
+                "xtiny_array_experiment::reshape(): invalid target shape.");
         }
 
         // void reshape(const shape_type& shape, layout_type l)
         // {
             // XTENSOR_PRECONDITION(s == shape(),
-                // "xtiny_array::reshape(): invalid target shape.");
+                // "xtiny_array_experiment::reshape(): invalid target shape.");
         // }
 
         // void reshape(const shape_type& shape, const strides_type& strides)
         // {
             // XTENSOR_PRECONDITION(s == shape(),
-                // "xtiny_array::reshape(): invalid target shape.");
+                // "xtiny_array_experiment::reshape(): invalid target shape.");
         // }
 
         template <class ST>

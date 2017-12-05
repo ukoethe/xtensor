@@ -127,7 +127,8 @@ add_executable(${XTENSOR_TARGET} ${XTENSOR_TESTS} ${XTENSOR_HEADERS})
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     add_dependencies(${XTENSOR_TARGET} gtest_main)
 endif()
-target_link_libraries(${XTENSOR_TARGET} ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${XTENSOR_TARGET} ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} C:/Users/ukoethe/Arbeit/src/benchmark/build/src/Release/benchmark.lib)
+include_directories(C:/Users/ukoethe/Arbeit/src/benchmark/include)
 
 add_custom_target(xtest COMMAND test_xtensor DEPENDS ${XTENSOR_TARGET})
 

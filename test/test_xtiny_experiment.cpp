@@ -10,6 +10,33 @@
 #include "xtensor/xtiny_experiment.hpp"
 #include "xtensor/xtiny.hpp"
 #include "xtensor/xarray.hpp"
+#include <benchmark/benchmark.h>
+
+static void BM_TinyExperimentCreation(benchmark::State& state) {
+    using array = xt::xtiny_array_experiment<int, 2>;
+
+    array a;
+    a[0] = 1;
+    a[1] = 2;
+
+    for (auto _ : state)
+        array b = a + a*a;
+}
+// Register the function as a benchmark
+BENCHMARK(BM_TinyExperimentCreation);
+
+static void BM_TinyCreation(benchmark::State& state) {
+    using array = xt::tiny_array<int, 2>;
+
+    array a;
+    a[0] = 1;
+    a[1] = 2;
+
+    for (auto _ : state)
+        array b = a + a*a;
+}
+// Register the function as a benchmark
+BENCHMARK(BM_TinyCreation);
 
 namespace xt
 {
@@ -35,7 +62,7 @@ namespace xt
 
     TEST(xtiny, xtiny_array)
     {
-        using array = xtiny_array<int, 2>;
+        using array = xtiny_array_experiment<int, 2>;
 
         array a;
 
